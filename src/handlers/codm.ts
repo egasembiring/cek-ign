@@ -1,28 +1,14 @@
 import { StatusMap } from "elysia";
 import { NotFound } from "@/errors/NotFound";
-import { fetchWithTimeout, sanitizeInput, createCacheKey } from "@/utils/helpers";
-import { cache } from "@/utils/database";
 
 import { type Response } from "@/types/Response";
 
 type Query = {
   id: string;
-  zone: string;
 };
 
-export async function mlbb({ id, zone }: Query) {
-  // Sanitize inputs
-  const sanitizedId = sanitizeInput(id);
-  const sanitizedZone = sanitizeInput(zone);
-
-  // Check cache first
-  const cacheKey = createCacheKey("mlbb", { id: sanitizedId, zone: sanitizedZone });
-  const cached = cache.get(cacheKey);
-  if (cached) {
-    return cached;
-  }
-
-  const hit = await fetchWithTimeout("https://order-sg.codashop.com/initPayment.action", {
+export async function codm({ id }: Query) {
+  const hit = await fetch("https://order-sg.codashop.com/initPayment.action", {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
@@ -30,12 +16,12 @@ export async function mlbb({ id, zone }: Query) {
       Referer: "https://www.codashop.com/",
     },
     body: new URLSearchParams({
-      "voucherPricePoint.id": "27684",
-      "voucherPricePoint.price": "527250",
+      "voucherPricePoint.id": "98575",
+      "voucherPricePoint.price": "16500",
       "voucherPricePoint.variablePrice": "0",
-      "user.userId": sanitizedId,
-      "user.zoneId": sanitizedZone,
-      voucherTypeName: "MOBILE_LEGENDS",
+      "user.userId": id,
+      "user.zoneId": "",
+      voucherTypeName: "CALL_OF_DUTY_MOBILE",
       shopLang: "id_ID",
     }),
   });
@@ -46,7 +32,7 @@ export async function mlbb({ id, zone }: Query) {
     throw new NotFound("IGN Tidak Ditemukan");
   }
 
-  const result = {
+  return {
     success: true,
     code: StatusMap.OK,
     data: {
@@ -54,15 +40,9 @@ export async function mlbb({ id, zone }: Query) {
       account: {
         ign: formatResponse(response.confirmationFields.username),
         id: response.user.userId,
-        zone: response.user.zoneId,
       },
     },
   };
-
-  // Cache the successful result
-  cache.set(cacheKey, result, 5 * 60 * 1000); // 5 minutes
-
-  return result;
 }
 
 function formatResponse(text: string) {

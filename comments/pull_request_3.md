@@ -1,6 +1,7 @@
 Request to add more games:
 
 It would be great to see more games added to the project. Some popular titles to consider include:
+
 - Among Us
 - Clash of Clans
 - Clash Royale

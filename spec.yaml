@@ -1,13 +1,47 @@
 openapi: 3.0.0
 info:
-  title: Cek IGN API Documentation
-  description: Dokumentasi + Playground
-  version: 1.1.0
+  title: Cek IGN API
+  description: API untuk mengecek In-Game Name (IGN) berbagai game populer
+  version: 2.0.0
+  contact:
+    name: egasembiring
+    url: https://github.com/egasembiring/cek-ign
+tags:
+  - name: MOBA Games
+    description: Mobile Legends, Wild Rift, Arena of Valor
+  - name: Battle Royale
+    description: Free Fire, PUBG Mobile, Call of Duty Mobile
+  - name: Strategy Games
+    description: Clash of Clans, Clash Royale
+  - name: RPG Games
+    description: Genshin Impact, Honkai series
 paths:
+  /:
+    get:
+      summary: Root endpoint
+      description: Menampilkan informasi API dan daftar endpoint
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  version:
+                    type: string
+                  endpoints:
+                    type: object
+                  documentation:
+                    type: string
   /mlbb:
     get:
+      tags:
+        - MOBA Games
       summary: "Mobile Legends: Bang-Bang"
-      description: game kikir dari munton
+      description: Cek IGN Mobile Legends dengan ID dan Zone
       parameters:
         - in: query
           name: id
@@ -29,26 +63,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                  code:
-                    type: number
-                  data:
-                    type: object
-                    properties:
-                      game:
-                        type: string
-                      account:
-                        type: object
-                        properties:
-                          ign:
-                            type: string
-                          id:
-                            type: string
-                          zone:
-                            type: string
+                $ref: "#/components/schemas/GameSuccessResponse"
               example:
                 success: true
                 code: 200
@@ -59,97 +74,16 @@ paths:
                     id: "469123581"
                     zone: "2418"
         400:
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                  code:
-                    type: number
-                  errors:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        path:
-                          type: string
-                        name:
-                          type: string
-                        message:
-                          type: string
-              examples:
-                Missing ID:
-                  value:
-                    success: false
-                    code: 400
-                    errors:
-                      [
-                        {
-                          path: "/id",
-                          name: "Expected string",
-                          message: "Expected  property 'id' to be  string but found: undefined",
-                        },
-                      ]
-                Missing Zone:
-                  value:
-                    success: false
-                    code: 400
-                    errors:
-                      [
-                        {
-                          path: "/zone",
-                          name: "Expected string",
-                          message: "Expected  property 'zone' to be  string but found: undefined",
-                        },
-                      ]
-                Missing Both:
-                  value:
-                    success: false
-                    code: 400
-                    errors:
-                      [
-                        {
-                          path: "/id",
-                          name: "Expected string",
-                          message: "Expected  property 'id' to be  string but found: undefined",
-                        },
-                        {
-                          path: "/zone",
-                          name: "Expected string",
-                          message: "Expected  property 'zone' to be  string but found: undefined",
-                        },
-                      ]
+          $ref: "#/components/responses/ValidationError"
         404:
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                  code:
-                    type: number
-                  error:
-                    type: object
-                    properties:
-                      name:
-                        type: string
-                      message:
-                        type: string
-              example:
-                success: false
-                code: 404
-                error:
-                  name: Not Found
-                  message: IGN Tidak Ditemukan
+          $ref: "#/components/responses/NotFoundError"
+
   /genshin:
     get:
+      tags:
+        - RPG Games
       summary: Genshin Impact
-      description: game kikir dari hoyoverse
+      description: Cek IGN Genshin Impact dengan UID
       parameters:
         - in: query
           name: uid
@@ -164,24 +98,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                  code:
-                    type: number
-                  data:
-                    type: object
-                    properties:
-                      game:
-                        type: string
-                      account:
-                        type: object
-                        properties:
-                          uid:
-                            type: string
-                          server:
-                            type: string
+                $ref: "#/components/schemas/GenshinSuccessResponse"
               example:
                 success: true
                 code: 200
@@ -192,83 +109,320 @@ paths:
                     uid: "800081806"
                     server: Asia
         400:
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                  code:
-                    type: number
-                  errors:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        path:
-                          type: string
-                        name:
-                          type: string
-                        message:
-                          type: string
-              example:
-                success: false
-                code: 400
-                errors:
-                  [
-                    {
-                      path: "/uid",
-                      name: "Expected string",
-                      message: "Expected  property 'uid' to be  string but found: undefined",
-                    },
-                  ]
+          $ref: "#/components/responses/ValidationError"
         404:
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                  code:
-                    type: number
-                  error:
-                    type: object
-                    properties:
-                      name:
-                        type: string
-                      message:
-                        type: string
-              example:
-                success: false
-                code: 404
-                error:
-                  name: Not Found
-                  message: IGN Tidak Ditemukan
+          $ref: "#/components/responses/NotFoundError"
         422:
-          description: Unprocessable Content
+          $ref: "#/components/responses/UnprocessableError"
+
+  /freefire:
+    get:
+      tags:
+        - Battle Royale
+      summary: Free Fire
+      description: Cek IGN Free Fire dengan Player ID
+      parameters:
+        - in: query
+          name: id
+          description: Player ID
+          required: true
+          schema:
+            type: string
+            example: "123456789"
+      responses:
+        200:
+          description: Success
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                  code:
-                    type: number
-                  error:
-                    type: object
-                    properties:
-                      name:
-                        type: string
-                      message:
-                        type: string
+                $ref: "#/components/schemas/GameSuccessResponse"
               example:
-                success: false
-                code: 422
-                error:
-                  name: Invalid UID
-                  message: Masukkan UID yang valid
+                success: true
+                code: 200
+                data:
+                  game: "Free Fire"
+                  account:
+                    ign: "PlayerName"
+                    id: "123456789"
+        400:
+          $ref: "#/components/responses/ValidationError"
+        404:
+          $ref: "#/components/responses/NotFoundError"
+
+  /pubgm:
+    get:
+      tags:
+        - Battle Royale
+      summary: PUBG Mobile
+      description: Cek IGN PUBG Mobile dengan Player ID
+      parameters:
+        - in: query
+          name: id
+          description: Player ID
+          required: true
+          schema:
+            type: string
+            example: "5123456789"
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GameSuccessResponse"
+              example:
+                success: true
+                code: 200
+                data:
+                  game: "PUBG Mobile"
+                  account:
+                    ign: "PlayerName"
+                    id: "5123456789"
+        400:
+          $ref: "#/components/responses/ValidationError"
+        404:
+          $ref: "#/components/responses/NotFoundError"
+
+  /codm:
+    get:
+      tags:
+        - Battle Royale
+      summary: Call of Duty Mobile
+      description: Cek IGN Call of Duty Mobile dengan Player ID
+      parameters:
+        - in: query
+          name: id
+          description: Player ID
+          required: true
+          schema:
+            type: string
+            example: "6123456789"
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GameSuccessResponse"
+              example:
+                success: true
+                code: 200
+                data:
+                  game: "Call of Duty Mobile"
+                  account:
+                    ign: "PlayerName"
+                    id: "6123456789"
+        400:
+          $ref: "#/components/responses/ValidationError"
+        404:
+          $ref: "#/components/responses/NotFoundError"
+
+  /coc:
+    get:
+      tags:
+        - Strategy Games
+      summary: Clash of Clans
+      description: Cek IGN Clash of Clans dengan Player Tag
+      parameters:
+        - in: query
+          name: tag
+          description: Player Tag (dengan atau tanpa #)
+          required: true
+          schema:
+            type: string
+            example: "2PP"
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClashSuccessResponse"
+              example:
+                success: true
+                code: 200
+                data:
+                  game: "Clash of Clans"
+                  account:
+                    ign: "PlayerName"
+                    tag: "#2PP"
+        400:
+          $ref: "#/components/responses/ValidationError"
+        404:
+          $ref: "#/components/responses/NotFoundError"
+
+  /cor:
+    get:
+      tags:
+        - Strategy Games
+      summary: Clash Royale
+      description: Cek IGN Clash Royale dengan Player Tag
+      parameters:
+        - in: query
+          name: tag
+          description: Player Tag (dengan atau tanpa #)
+          required: true
+          schema:
+            type: string
+            example: "2PP"
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClashSuccessResponse"
+              example:
+                success: true
+                code: 200
+                data:
+                  game: "Clash Royale"
+                  account:
+                    ign: "PlayerName"
+                    tag: "#2PP"
+        400:
+          $ref: "#/components/responses/ValidationError"
+        404:
+          $ref: "#/components/responses/NotFoundError"
+
+components:
+  schemas:
+    GameSuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        code:
+          type: number
+        data:
+          type: object
+          properties:
+            game:
+              type: string
+            account:
+              type: object
+              properties:
+                ign:
+                  type: string
+                id:
+                  type: string
+
+    GenshinSuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        code:
+          type: number
+        data:
+          type: object
+          properties:
+            game:
+              type: string
+            account:
+              type: object
+              properties:
+                ign:
+                  type: string
+                uid:
+                  type: string
+                server:
+                  type: string
+
+    ClashSuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        code:
+          type: number
+        data:
+          type: object
+          properties:
+            game:
+              type: string
+            account:
+              type: object
+              properties:
+                ign:
+                  type: string
+                tag:
+                  type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        code:
+          type: number
+        error:
+          type: object
+          properties:
+            name:
+              type: string
+            message:
+              type: string
+
+    ValidationErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        code:
+          type: number
+          example: 400
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              path:
+                type: string
+              name:
+                type: string
+              message:
+                type: string
+
+  responses:
+    ValidationError:
+      description: Bad Request - Parameter tidak valid
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ValidationErrorResponse"
+          example:
+            success: false
+            code: 400
+            errors:
+              - path: "/id"
+                name: "Expected string"
+                message: "Expected property 'id' to be string but found: undefined"
+
+    NotFoundError:
+      description: Not Found - Player/IGN tidak ditemukan
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            success: false
+            code: 404
+            error:
+              name: "Not Found"
+              message: "IGN Tidak Ditemukan"
+
+    UnprocessableError:
+      description: Unprocessable Content - Format data tidak valid
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            success: false
+            code: 422
+            error:
+              name: "Invalid UID"
+              message: "Masukkan UID yang valid"
